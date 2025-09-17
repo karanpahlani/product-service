@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "8000:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
+    environment:
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+
+  product-service-test:
+    build: .
+    depends_on:
+      - dynamodb-local
+    environment:
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - PRODUCTS_TABLE=products-test
+      - AWS_ENDPOINT_URL=http://dynamodb-local:8000
+    command: ["make", "test"]
+    volumes:
+      - .:/app
+    working_dir: /app
